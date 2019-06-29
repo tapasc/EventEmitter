@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="btn_01">Click Me</div>
+</body>
+<script>
+    function EventEmitter() {
+        this.handlers = [];  // observers
+    }
+    EventEmitter.prototype.addListener = function (evtObj) {
+        this.handlers.push(evtObj);
+    }
+    EventEmitter.prototype.removeListener = function (beh) {
+        this.handlers = this.handlers.filter(
+            function (item) {
+                if (item.beh !== beh) {
+                    return item;
+                }
+            }
+        );
+    }
+    EventEmitter.prototype.dispatchEvent = function (payLoad) {
+        this.handlers.forEach(function (item) {
+            item.beh.call(item.scope,payLoad);
+        });
+    }
+
+
+
+
+
+    function CustomClass(injection) {
+        this.className = "customClass";
+        this._loaded = new injection();
+        this._loaded.addListener({beh:this.dataLoadFinish,scope:this});
+        this.elm = document.querySelector("#btn_01");
+    }
+
+    CustomClass.prototype.dataLoaded = function () {
+        this._loaded.dispatchEvent({className:'fired from CustomClass'});
+    }
+    CustomClass.prototype.dataLoadFinish = function (payLoad) {
+        console.log('finish',payLoad);
+    }
+
+
+    var obj = new CustomClass(EventEmitter);
+        obj.dataLoaded();
+</script>
+
+</html>

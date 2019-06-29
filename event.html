@@ -6,10 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <style>
+    .btn{
+        border:1px solid lightcoral;
+        background:lightgreen;
+        width:150px;
+        text-align: center;
+    }
+    </style>
 </head>
 
 <body>
-    <div id="btn_01">Click Me</div>
+    <div id="btn_01" class="btn">Dispatch Event</div>
+    <div id="btn_02" class="btn">Remove Event</div>
 </body>
 <script>
     function EventEmitter() {
@@ -18,10 +27,10 @@
     EventEmitter.prototype.addListener = function (evtObj) {
         this.handlers.push(evtObj);
     }
-    EventEmitter.prototype.removeListener = function (beh) {
+    EventEmitter.prototype.removeListener = function (evt) {
         this.handlers = this.handlers.filter(
             function (item) {
-                if (item.beh !== beh) {
+                if (item.beh !== evt) {
                     return item;
                 }
             }
@@ -29,7 +38,7 @@
     }
     EventEmitter.prototype.dispatchEvent = function (payLoad) {
         this.handlers.forEach(function (item) {
-            item.beh.call(item.scope,payLoad);
+            item.beh.call(item.scope, payLoad);
         });
     }
 
@@ -40,20 +49,33 @@
     function CustomClass(injection) {
         this.className = "customClass";
         this._loaded = new injection();
-        this._loaded.addListener({beh:this.dataLoadFinish,scope:this});
-        this.elm = document.querySelector("#btn_01");
+        this._loaded.addListener({ beh: this.dataLoadFinish, scope: this });
+        this._loaded.addListener({ beh: this.dataLoadFinisher, scope: this });
+        this.elm_01 = document.querySelector("#btn_01");
+        this.elm_02 = document.querySelector("#btn_02");
+        this.dataLoaded();
+        console.log(this._loaded);
     }
 
     CustomClass.prototype.dataLoaded = function () {
-        this._loaded.dispatchEvent({className:'fired from CustomClass'});
+        //this._loaded.dispatchEvent({className:'fired from CustomClass'});
+        this.elm_01.onclick = () => {
+            this._loaded.dispatchEvent({ className: 'fired from CustomClass' });
+        }
+        this.elm_02.onclick = () => {
+            this._loaded.removeListener(this.dataLoadFinisher);
+        }
     }
     CustomClass.prototype.dataLoadFinish = function (payLoad) {
-        console.log('finish',payLoad);
+        console.log('finish...', payLoad);
+    }
+    CustomClass.prototype.dataLoadFinisher = function (payLoad) {
+        console.log('finisher...', payLoad);
     }
 
 
     var obj = new CustomClass(EventEmitter);
-        obj.dataLoaded();
+    obj.dataLoaded();
 </script>
 
 </html>
